@@ -1,0 +1,35 @@
+plugins {
+    id "me.champeau.gradle.jmh" version "0.3.1"
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.2.1'
+}
+
+
+dependencies {
+    jmh 'org.openjdk.jmh:jmh-core:1.15'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.15'
+
+    compile group: 'javassist', name: 'javassist', version: '3.10.0.GA'
+    compile 'org.jboss.forge.roaster:roaster-api:2.19.3.Final'
+    compile 'org.jboss.forge.roaster:roaster-jdt:2.19.3.Final'
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile 'org.openjdk.jmh:jmh-core:1.15'
+    testCompile 'org.openjdk.jmh:jmh-generator-annprocess:1.15'
+}
+
+jmh {
+//    include = '.*EmplacementsBenchmark.*'
+    duplicateClassesStrategy = 'warn'
+    verbosity = 'EXTRA'
+}
