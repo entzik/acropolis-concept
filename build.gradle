@@ -32,4 +32,5 @@ jmh {
 //    include = '.*EmplacementsBenchmark.*'
     duplicateClassesStrategy = 'warn'
     verbosity = 'EXTRA'
+    jvmArgsPrepend = '-Xmx8192m'
 }

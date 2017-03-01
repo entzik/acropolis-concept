@@ -1,5 +1,6 @@
 package com.thekirschners.emplacements.column;
 
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -148,6 +149,17 @@ public class ObservationsTimeSeriesTest {
         assertEquals(75.2, cursor.at(0).getHumidity());
         assertEquals(76.3, cursor.at(0).getWindSpeed());
 
+    }
+
+    @Test
+    public void testExtractTimeSlice() {
+        EnvObsTimeSeries ts = new EnvObsTimeSeries(1000);
+        for (int i = 0; i < 1000; i ++)
+            ts.emplace(i * 2, Math.random(), Math.random(), Math.random());
+
+        final int[] ints = ts.extractTimeSlice(501, 521);
+        assertEquals(251, ints[0]);
+        assertEquals(261, ints[1]);
     }
 
     private EnvObsTimeSeries buildEnvObsTimeSeries(int planedCapacity, long timestamp) {

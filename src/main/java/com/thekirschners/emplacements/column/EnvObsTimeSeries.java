@@ -2,6 +2,8 @@ package com.thekirschners.emplacements.column;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
@@ -83,6 +85,11 @@ public class EnvObsTimeSeries implements Iterable<EnvObservation>{
     public Stream<EnvObservation> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
+    public Stream<EnvObservation> stream(int start, int end) {
+        final Iterator<EnvObservation> iterator = iterator(start, end);
+        final Spliterator<EnvObservation> spliterator = Spliterators.spliteratorUnknownSize(iterator, 0);
+        return StreamSupport.stream(spliterator, false);
+    }
 
     public ArbitraryAccessCursor get(int ndx) {
         return new ArbitraryAccessCursor(ndx);
@@ -115,70 +122,73 @@ public class EnvObsTimeSeries implements Iterable<EnvObservation>{
     }
 
 
-    public class ArbitraryAccessCursor extends EnvObservationItem {
+    public class ArbitraryAccessCursor implements EnvObservation {
+        private int crtNdx;
+
         protected ArbitraryAccessCursor(int ndx) {
-            super(ndx);
+            this.crtNdx = ndx;
         }
 
         public ArbitraryAccessCursor at(int ndx) {
-            setCrtNdx(ndx);
+            this.crtNdx = ndx;
             return this;
+        }
+
+        @Override
+        public long getTimestamp() {
+            return EnvObsTimeSeries.this.timestamps[crtNdx];
+        }
+
+        @Override
+        public void setTimeStamp(long timeStamp) {
+            EnvObsTimeSeries.this.timestamps[crtNdx] = timeStamp;
+        }
+
+        @Override
+        public double getTemperature() {
+            return EnvObsTimeSeries.this.temparatures[crtNdx];
+        }
+
+        @Override
+        public void setTemperature(double temperature) {
+            EnvObsTimeSeries.this.temparatures[crtNdx] = temperature;
+        }
+
+        @Override
+        public double getHumidity() {
+            return EnvObsTimeSeries.this.humidity[crtNdx];
+        }
+
+        @Override
+        public void setHumidity(double humidity) {
+            EnvObsTimeSeries.this.humidity[crtNdx] = humidity;
+        }
+
+        @Override
+        public double getWindSpeed() {
+            return EnvObsTimeSeries.this.windSpeeds[crtNdx];
+        }
+
+        @Override
+        public void setWindSpeed(double windSpeed) {
+            EnvObsTimeSeries.this.windSpeeds[crtNdx] = windSpeed;
         }
     }
 
-    public class EnvObservationIterator extends EnvObservationItem implements Iterator<EnvObservation> {
+    public class EnvObservationIterator  implements EnvObservation, Iterator<EnvObservation> {
 
+        private int crtNdx;
         private final int end;
 
         protected EnvObservationIterator() {
-            super(-1);
+            this.crtNdx = 1;
             this.end = EnvObsTimeSeries.this.position;
         }
 
         public EnvObservationIterator(int start, int end) {
-            super(start - 1);
+            this.crtNdx = start - 1;
             this.end = end;
         }
-
-        @Override
-        public boolean hasNext() {
-            return this.getCrtNdx() < EnvObsTimeSeries.this.position;
-        }
-
-        @Override
-        public EnvObservationIterator next() {
-            incNdx();
-            return this;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void forEachRemaining(Consumer<? super EnvObservation> action) {
-            while (hasNext())
-                action.accept(next());
-        }
-    }
-
-    protected class EnvObservationItem implements EnvObservation {
-        private int crtNdx;
-
-        public int getCrtNdx() {
-            return crtNdx;
-        }
-
-        protected EnvObservationItem setCrtNdx(int crtNdx) {
-            this.crtNdx = crtNdx;
-            return this;
-        }
-
-        protected void incNdx() {
-            this.crtNdx ++;
-        }
-
 
         @Override
         public long getTimestamp() {
@@ -220,9 +230,26 @@ public class EnvObsTimeSeries implements Iterable<EnvObservation>{
             EnvObsTimeSeries.this.windSpeeds[crtNdx] = windSpeed;
         }
 
-        protected EnvObservationItem(int ndx) {
-            this.crtNdx = ndx;
+        @Override
+        public boolean hasNext() {
+            return this.crtNdx < end;
         }
 
+        @Override
+        public EnvObservationIterator next() {
+            crtNdx ++;
+            return this;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super EnvObservation> action) {
+            while (hasNext())
+                action.accept(next());
+        }
     }
 }

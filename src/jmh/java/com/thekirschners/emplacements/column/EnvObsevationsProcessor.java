@@ -3,9 +3,10 @@ package com.thekirschners.emplacements.column;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.OptionalDouble;
+import java.util.stream.Collectors;
 
 public class EnvObsevationsProcessor {
-    public static OptionalDouble averageMonthlyTemperatureWithStream(EnvObsTimeSeries columnarStore, int year, int month) {
+    public static OptionalDouble averageMonthlyTemperatureWithPrimitiveStream(EnvObsTimeSeries columnarStore, int year, int month) {
         final Calendar startCalendar = Calendar.getInstance();
         startCalendar.set(
                 year,
@@ -71,7 +72,7 @@ public class EnvObsevationsProcessor {
         return OptionalDouble.of(average);
     }
 
-    public static OptionalDouble averageMonthlyTemperatureWithItertor(EnvObsTimeSeries columnarStore, int year, int month) {
+    public static OptionalDouble averageMonthlyTemperatureWithObjectItertor(EnvObsTimeSeries columnarStore, int year, int month) {
         final Calendar startCalendar = Calendar.getInstance();
         startCalendar.set(
                 year,
@@ -105,5 +106,34 @@ public class EnvObsevationsProcessor {
             average += (it.next().getTemperature() / count);
 
         return OptionalDouble.of(average);
+    }
+
+    public static OptionalDouble averageMonthlyTemperatureWithObjectStream(EnvObsTimeSeries columnarStore, int year, int month) {
+        final Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(
+                year,
+                month,
+                startCalendar.getMinimum(Calendar.DAY_OF_MONTH),
+                startCalendar.getMinimum(Calendar.HOUR_OF_DAY),
+                startCalendar.getMinimum(Calendar.MINUTE),
+                startCalendar.getMinimum(Calendar.SECOND)
+        );
+        startCalendar.set(Calendar.MILLISECOND, startCalendar.getMinimum(Calendar.MILLISECOND));
+        final long startTime = startCalendar.getTimeInMillis();
+
+        final Calendar endCalendar = Calendar.getInstance();
+        endCalendar.set(Calendar.YEAR, year);
+        endCalendar.set(Calendar.MONTH, month);
+        endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        endCalendar.set(Calendar.HOUR_OF_DAY, endCalendar.getMaximum(Calendar.HOUR_OF_DAY));
+        endCalendar.set(Calendar.MINUTE, endCalendar.getMaximum(Calendar.HOUR_OF_DAY));
+        endCalendar.set(Calendar.SECOND, endCalendar.getMaximum(Calendar.HOUR_OF_DAY));
+        endCalendar.set(Calendar.MILLISECOND, endCalendar.getMaximum(Calendar.MILLISECOND));
+
+        final long endTime = endCalendar.getTimeInMillis();
+
+        final int[] timeSliceIndexes = columnarStore.extractTimeSlice(startTime, endTime);
+
+        return columnarStore.stream(timeSliceIndexes[0], timeSliceIndexes[1]).mapToDouble(EnvObservation::getTemperature).average();
     }
 }
