@@ -6,6 +6,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.DoubleStream;
 
 public class EnvObservationProcessorBenchmark {
 
@@ -153,5 +154,10 @@ public class EnvObservationProcessorBenchmark {
     public void classicBenchmarkShuffled(ClassicBenchmarkStateShuffled state, Blackhole bh) {
         final OptionalDouble optionalDouble = state.getEnvObservationColumnarList(2014, Calendar.MARCH).stream().mapToDouble(EnvObservation::getTemperature).average();
         bh.consume(optionalDouble);
+    }
+
+    public OptionalDouble calculateAverageTemperature(List<EnvObservationImpl> obs) {
+        final DoubleStream doubleStream = obs.stream().mapToDouble(EnvObservationImpl::getTemperature);
+        return doubleStream.average();
     }
 }

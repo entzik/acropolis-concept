@@ -1,12 +1,12 @@
 package com.thekirschners.emplacements.column;
 
 public interface EnvObservation {
-    public long getTimestamp();
-    public void setTimeStamp(long timeStamp);
-    public double getTemperature();
-    public void setTemperature(double temperature);
-    public double getHumidity();
-    public void setHumidity(double humidity);
-    public double getWindSpeed();
-    public void setWindSpeed(double windSpeed);
+    long getTimestamp();
+    void setTimeStamp(long timeStamp);
+    double getTemperature();
+    void setTemperature(double temperature);
+    double getHumidity();
+    void setHumidity(double humidity);
+    double getWindSpeed();
+    void setWindSpeed(double windSpeed);
 }

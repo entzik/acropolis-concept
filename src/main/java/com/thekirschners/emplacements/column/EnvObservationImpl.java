@@ -3,6 +3,8 @@ package com.thekirschners.emplacements.column;
 /**
  * Created by emilkirschner on 08/02/17.
  */
+
+
 public class EnvObservationImpl implements EnvObservation {
     private long timestamp;
     private double temperature;
@@ -15,6 +17,9 @@ public class EnvObservationImpl implements EnvObservation {
         this.humidity = humidity;
         this.windSpeed = windSpeed;
     }
+
+    // + all getters and setters
+
 
     @Override
     public long getTimestamp() {
